@@ -5,27 +5,27 @@ on:
     types: [labeled]
 
 jobs:
-  comment-on-label:
+  comment:
     runs-on: ubuntu-latest
     steps:
       - name: Add comment based on label
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         with:
           script: |
             const label = context.payload.label.name;
-            const issue_number = context.payload.issue.number;
-            
-            const labelMessages = {
-              'documentation': 'Thank you for flagging this documentation issue. We will update it soon.',
-              'bug': 'Thank you for reporting this bug. Our team will investigate and fix it.',
-              'completed': 'This issue has been resolved. Thank you for your contribution!'
-            };
-            
-            if (labelMessages[label]) {
+            let comment = '';
+            if (label === 'documentation') {
+              comment = 'Thank you for flagging this documentation issue. We will update it soon.';
+            } else if (label === 'bug') {
+              comment = 'Thank you for reporting this bug. Our team will investigate and fix it.';
+            } else if (label === 'completed') {
+              comment = 'This issue has been resolved. Thank you for your contribution!';
+            }
+            if (comment) {
               github.rest.issues.createComment({
+                issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: issue_number,
-                body: labelMessages[label]
+                body: comment
               });
             }
